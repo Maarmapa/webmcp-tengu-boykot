@@ -1244,13 +1244,13 @@ function toggleMenu(){
   document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
 }
 
-const WA_NUMBER='56999999999';
+// El número de WhatsApp vive en Vercel (TENGU_WA_NUMBER) y lo aplica /api/wa.js.
 const cursor=document.getElementById('cursor');
 const ring=document.getElementById('cursorRing');
 document.addEventListener('mousemove',e=>{cursor.style.left=e.clientX+'px';cursor.style.top=e.clientY+'px';ring.style.left=e.clientX+'px';ring.style.top=e.clientY+'px';});
 document.querySelectorAll('a,button,.menu-item,.sake-card,.sugg,.wa-tmpl').forEach(el=>{el.addEventListener('mouseenter',()=>{cursor.style.width='14px';cursor.style.height='14px';});el.addEventListener('mouseleave',()=>{cursor.style.width='8px';cursor.style.height='8px';});});
 function showCat(id,btn){document.querySelectorAll('.menu-cat').forEach(c=>c.classList.remove('active'));document.querySelectorAll('.menu-tab').forEach(t=>t.classList.remove('active'));document.getElementById('cat-'+id).classList.add('active');btn.classList.add('active');}
-function openWA(msg){window.open('https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(msg),'_blank');}
+function openWA(msg){window.open('/api/wa?msg='+encodeURIComponent(msg),'_blank','noopener');}
 document.getElementById('waFloat').onclick=e=>{e.preventDefault();openWA('Hola! Me gustaria hacer una reserva en Tengu.');};
 function submitReserva(){const name=document.getElementById('srName').value.trim();const phone=document.getElementById('srPhone').value.trim();const date=document.getElementById('srDate').value;const time=document.getElementById('srTime').value;const guests=document.getElementById('srGuests').value;const occ=document.getElementById('srOcc').value;const notes=document.getElementById('srNotes').value.trim();if(!name||!date||!time||!guests){alert('Por favor completa nombre, fecha, hora y número de comensales.');return;}const msg='*Solicitud de reserva — Tengu*\n👤 '+name+(phone?' · '+phone:'')+'\n📅 '+date+' a las '+time+'\n👥 '+guests+(occ?'\n🎉 '+occ:'')+(notes?'\n📝 '+notes:'');openWA(msg);}
 const input=document.getElementById('chatInput');
