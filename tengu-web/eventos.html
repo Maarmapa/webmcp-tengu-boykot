@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Experiencias — Tengu · W Santiago</title>
+<meta name="description" content="Experiencias con cupos limitados en Tengu: kaitai show, ronqueo de atún bluefin y noches especiales del contador. Asientos por zona en el W Santiago, Las Condes.">
+<link rel="canonical" href="https://tengu-deploy.vercel.app/eventos.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Experiencias — Tengu · W Santiago">
+<meta property="og:description" content="Cupos limitados: el despiece ceremonial del atún bluefin, frente a ti.">
+<meta property="og:image" content="https://tengu-deploy.vercel.app/tengu_tuna_roll.jpeg">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Serif+JP:wght@300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{--black:#060503;--dark:#0f0d0a;--dark2:#1a1510;--dark3:#241e17;--gold:#c8921a;--gold2:#e4a82a;--cream:#e8e0d0;--cream2:#b8ae9e}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--cream);font-family:'Cormorant Garamond',serif;line-height:1.7}
+a{color:inherit}
+.mono{font-family:'DM Mono',monospace}
+nav{display:flex;justify-content:space-between;align-items:center;padding:22px 40px;border-bottom:1px solid rgba(200,146,26,.1)}
+.logo{font-family:'Noto Serif JP',serif;font-size:21px;color:var(--gold);text-decoration:none;letter-spacing:.12em}
+.logo span{font-family:'Cormorant Garamond',serif;font-size:10px;color:var(--cream2);display:block;letter-spacing:.28em;margin-top:2px}
+.volver{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--cream2);text-decoration:none}
+.volver:hover{color:var(--gold)}
+.wrap{max-width:940px;margin:0 auto;padding:56px 24px 90px}
+.tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:14px}
+h1{font-weight:300;font-size:clamp(34px,6vw,52px);line-height:1.15}
+h1 em{color:var(--gold);font-style:italic}
+.intro{color:var(--cream2);max-width:640px;margin-top:14px;font-size:17px}
+.evento{border:1px solid rgba(200,146,26,.18);background:var(--dark);margin-top:40px;overflow:hidden}
+.ev-head{padding:30px 30px 22px;border-bottom:1px solid rgba(200,146,26,.12)}
+.ev-fecha{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.ev-nombre{font-size:31px;font-weight:300;margin-top:6px}
+.ev-sub{color:var(--gold2);font-style:italic;font-size:18px;margin-top:2px}
+.ev-desc{color:var(--cream2);margin-top:14px;max-width:660px}
+.zonas{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(200,146,26,.12)}
+.zona{background:var(--dark);padding:26px 30px;cursor:pointer;transition:background .3s;border:none;text-align:left;color:inherit;font-family:inherit}
+.zona:hover{background:var(--dark2)}
+.zona.sel{background:var(--dark3);box-shadow:inset 3px 0 0 var(--gold)}
+.z-nombre{font-size:22px;font-weight:400}
+.z-desc{color:var(--cream2);font-size:15px;margin-top:5px;min-height:44px}
+.z-precio{font-family:'DM Mono',monospace;font-size:17px;color:var(--gold);margin-top:12px}
+.z-cupos{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--cream2);margin-top:5px}
+.z-cupos.agotado{color:#b8574c}
+form{padding:28px 30px;border-top:1px solid rgba(200,146,26,.12);display:none}
+form.on{display:block}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream2);display:block;margin-bottom:5px}
+input,textarea,select{width:100%;background:var(--dark2);border:1px solid rgba(200,146,26,.2);color:var(--cream);padding:11px 13px;font-family:'DM Mono',monospace;font-size:12px;border-radius:3px}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--gold)}
+textarea{font-family:'Cormorant Garamond',serif;font-size:15px;min-height:64px;resize:vertical}
+.total{font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);margin:16px 0}
+.btn{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;background:var(--gold);color:var(--black);border:none;padding:14px 30px;cursor:pointer;transition:background .3s}
+.btn:hover{background:var(--gold2)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.aviso{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(184,174,158,.6);margin-top:14px;line-height:1.8}
+.ok{border:1px solid var(--gold);background:var(--dark2);padding:24px 26px;margin-top:18px}
+.ok .codigo{font-family:'DM Mono',monospace;font-size:22px;color:var(--gold);letter-spacing:.1em}
+#vacio{border:1px dashed rgba(200,146,26,.25);padding:44px 30px;text-align:center;color:var(--cream2);margin-top:40px}
+footer{border-top:1px solid rgba(200,146,26,.09);padding:30px 40px;text-align:center}
+@media(max-width:720px){
+  nav{padding:16px 20px}.wrap{padding:40px 18px 70px}
+  .zonas{grid-template-columns:1fr}.row{grid-template-columns:1fr}
+  .ev-head,.zona,form{padding-left:20px;padding-right:20px}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="/">天狗<span>Tengu · W Santiago</span></a>
+  <a class="volver" href="/">← Volver al restaurante</a>
+</nav>
+
+<div class="wrap">
+  <span class="tag">Experiencias</span>
+  <h1>Noches de <em>cupo limitado</em></h1>
+  <p class="intro">Ceremonias que ocurren una sola vez. El asiento se reserva por adelantado y cada zona vive la experiencia distinto: la barra, a centímetros del cuchillo; el salón, con la misma degustación completa.</p>
+
+  <div id="lista"></div>
+  <div id="vacio" style="display:none">
+    <p class="tag" style="margin-bottom:8px">Sin experiencias publicadas</p>
+    <p>Estamos preparando la próxima ceremonia. Síguenos en <a href="https://www.instagram.com/tengu_restaurant/" style="color:var(--gold)">@tengu_restaurant</a> para enterarte cuando abran los cupos.</p>
+  </div>
+</div>
+
+<footer><p class="mono" style="font-size:9px;letter-spacing:.2em;color:var(--cream2)">TENGU · ISIDORA GOYENECHEA 3000, LOCAL 104 · LAS CONDES</p></footer>
+
+<script>
+const $=s=>document.querySelector(s);
+const clp=n=>'$'+Number(n).toLocaleString('es-CL');
+let EVENTOS=[], sel={};
+
+function render(){
+  if(!EVENTOS.length){ $('#vacio').style.display='block'; return; }
+  $('#lista').innerHTML=EVENTOS.map((ev,i)=>{
+    const f=new Date(ev.fecha+'T12:00:00-04:00');
+    const fecha=f.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
+    const zonas=(ev.zonas||[]).map(z=>`
+      <button class="zona" data-ev="${i}" data-zona="${z.id}" ${z.disponibles<1?'disabled':''}>
+        <div class="z-nombre">${esc(z.nombre)}</div>
+        <div class="z-desc">${esc(z.descripcion||'')}</div>
+        <div class="z-precio">${clp(z.precio)} por persona</div>
+        <div class="z-cupos ${z.disponibles<1?'agotado':''}">${z.disponibles<1?'Agotado':(z.disponibles+' cupos disponibles')}</div>
+      </button>`).join('');
+    return `<div class="evento">
+      <div class="ev-head">
+        <div class="ev-fecha">${fecha} · ${ev.hora} hrs</div>
+        <div class="ev-nombre">${esc(ev.nombre)}</div>
+        ${ev.subtitulo?`<div class="ev-sub">${esc(ev.subtitulo)}</div>`:''}
+        ${ev.descripcion?`<p class="ev-desc">${esc(ev.descripcion)}</p>`:''}
+      </div>
+      <div class="zonas">${zonas}</div>
+      <form id="f${i}" onsubmit="return enviar(event,${i})">
+        <div class="row">
+          <div><label>Nombre y apellido</label><input name="nombre" required maxlength="80"></div>
+          <div><label>Teléfono</label><input name="telefono" maxlength="25" placeholder="+56 9 ..."></div>
+        </div>
+        <div class="row">
+          <div><label>Correo</label><input name="email" type="email" maxlength="120"></div>
+          <div><label>Personas</label><select name="cantidad" onchange="total(${i})">
+            ${[1,2,3,4,5,6].map(n=>`<option value="${n}">${n}</option>`).join('')}
+          </select></div>
+        </div>
+        <div><label>Alergias o comentarios</label><textarea name="notas" maxlength="300"></textarea></div>
+        <div class="total" id="t${i}"></div>
+        <button class="btn" type="submit">Reservar cupos</button>
+        <p class="aviso">Al reservar quedan tus cupos tomados por 24 horas. El restaurante te contacta para confirmar el pago y cerrar la experiencia. Precios en pesos chilenos, IVA incluido.</p>
+        <div id="ok${i}"></div>
+      </form>
+    </div>`;
+  }).join('');
+
+  document.querySelectorAll('.zona').forEach(b=>b.addEventListener('click',()=>{
+    const i=b.dataset.ev;
+    document.querySelectorAll(`.zona[data-ev="${i}"]`).forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel');
+    sel[i]=b.dataset.zona;
+    $('#f'+i).classList.add('on');
+    total(i);
+    $('#f'+i).scrollIntoView({behavior:'smooth',block:'nearest'});
+  }));
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function total(i){
+  const ev=EVENTOS[i], z=(ev.zonas||[]).find(x=>x.id===sel[i]);
+  if(!z) return;
+  const n=parseInt($('#f'+i).cantidad.value,10)||1;
+  $('#t'+i).textContent=`${z.nombre} · ${n} ${n===1?'persona':'personas'} · Total ${clp(z.precio*n)}`;
+}
+async function enviar(e,i){
+  e.preventDefault();
+  const f=$('#f'+i), btn=f.querySelector('button');
+  btn.disabled=true; btn.textContent='Enviando…';
+  const r=await fetch('/api/eventos',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({slug:EVENTOS[i].slug,zona:sel[i],nombre:f.nombre.value,
+      email:f.email.value,telefono:f.telefono.value,cantidad:parseInt(f.cantidad.value,10),notas:f.notas.value})});
+  const j=await r.json();
+  btn.disabled=false; btn.textContent='Reservar cupos';
+  if(j.error){ $('#ok'+i).innerHTML=`<div class="ok" style="border-color:#b8574c"><p>${esc(j.error)}</p></div>`; return false; }
+  $('#ok'+i).innerHTML=`<div class="ok">
+    <p class="tag" style="margin-bottom:6px">Cupos reservados</p>
+    <div class="codigo">${esc(j.codigo)}</div>
+    <p style="color:var(--cream2);margin-top:10px">${esc(j.zona)} · ${esc(String(j.evento))} · total ${clp(j.monto_total)}</p>
+    <p style="color:var(--cream2);margin-top:8px">${esc(j.aviso||'')}</p></div>`;
+  f.reset();
+  cargar();
+  return false;
+}
+async function cargar(){
+  try{
+    const r=await fetch('/api/eventos');
+    const j=await r.json();
+    EVENTOS=j.eventos||[];
+    render();
+  }catch(e){ $('#vacio').style.display='block'; }
+}
+cargar();
+</script>
+</body>
+</html>

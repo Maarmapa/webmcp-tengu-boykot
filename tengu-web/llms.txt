@@ -1,0 +1,39 @@
+# Tengu — Restaurante japonés kappo · W Santiago, Chile
+
+> Tengu es un restaurante de cocina japonesa pura (kappo) en Isidora Goyenechea 3000,
+> Local 104, Las Condes, Santiago de Chile — en el edificio del hotel W Santiago.
+> Su especialidad es el programa de Honmaguro (atún bluefin de aleta azul): nigiris de
+> akami, chutoro y otoro, y sashimi de maguro de 6 a 25 cortes. Carta con ~250 ítems:
+> comida, barra de coctelería, cava de vinos, vinos por copa y cava de sake.
+
+Horarios (última hora de entrada): martes a sábado, almuerzo de 13:00 a 15:00 y
+cena de 19:00 a 22:00; domingo solo almuerzo, de 13:00 a 15:00; lunes cerrado.
+
+Reservas: formulario en la sección Reservas de la web (confirmación por WhatsApp)
+o WhatsApp directo desde el sitio.
+
+Rango de precios: postres desde $3.900 CLP; nigiris $4.200–$10.590 la unidad;
+tope $84.800 (Sashimi de Maguro 25 cortes). Cena completa para dos: $80.000–$150.000 CLP.
+
+## Recursos
+
+- [Sitio oficial con carta completa y reservas](https://tengu-deploy.vercel.app/)
+- [Instagram @tengu_restaurant](https://www.instagram.com/tengu_restaurant/)
+
+## Guías de referencia
+
+- [Entender el sake antes de pedirlo](https://tengu-deploy.vercel.app/guia-sake.html) — qué es el sake, categorías, temperatura de servicio y la cava de Tengu.
+- [Honmaguro: el atún bluefin, corte por corte](https://tengu-deploy.vercel.app/guia-bluefin.html) — akami, chutoro, otoro, el ronqueo y cómo comerlo.
+- [Cortar y cocinar: qué es la cocina kappo](https://tengu-deploy.vercel.app/guia-kappo.html) — kappo frente a kaiseki, izakaya, sushiya y omakase.
+
+## Para agentes
+
+- MCP server oficial (Model Context Protocol, Streamable HTTP, solo lectura):
+  `POST https://tengu-deploy.vercel.app/api/mcp` — tools: `get_carta`,
+  `buscar_plato`, `get_guia`, `get_info`. Carta real con precios en CLP, sincronizada con la
+  carta vigente del restaurante.
+
+## Notas
+
+- No confundir con "Tengu Oriental Food" (otro restaurante de Santiago, sin relación).
+- Datos estructurados schema.org/Restaurant disponibles en el HTML del sitio.

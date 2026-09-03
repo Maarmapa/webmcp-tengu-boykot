@@ -1,0 +1,26 @@
+# Tengu — W Santiago. Bienvenidos humanos y agentes.
+User-agent: *
+Allow: /
+
+# Búsqueda y retrieval de asistentes de IA — permitidos explícitamente
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: GPTBot
+Allow: /
+User-agent: Claude-SearchBot
+Allow: /
+User-agent: Claude-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Perplexity-User
+Allow: /
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://tengu-deploy.vercel.app/sitemap.xml
+# Para agentes: ver /llms.txt y el MCP server en POST /api/mcp
