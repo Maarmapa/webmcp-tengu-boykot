@@ -1,5 +1,13 @@
 # Boykot WebMCP — a real art-supply store that hands agents its tools
 
+> **Scope of this repo.** This is the WebMCP layer of a production Next.js store whose full
+> codebase is private (it contains the shop's back-office). Everything here is the code that
+> runs in the browser to register and execute the tools; the read tools proxy to the store's
+> public MCP server (`POST https://boykot-nu.vercel.app/api/mcp`, JSON-RPC), so the live URL is
+> the runnable artifact. Files mirror `web/lib/webmcp/` and `web/components/` of the store as
+> of 2026-09-03. License: MIT (see `LICENSE`).
+
+
 **The WebMCP Challenge submission.** Boykot ([boykot.cl](https://www.boykot.cl)) is a graffiti & art-materials store in Santiago de Chile, running since 2010. This repo contains the WebMCP layer that lets an AI agent operate the store's own page **through tools the site itself exposes** — instead of scraping the DOM or asking the user to delegate credentials.
 
 **Live demo:** https://boykot-nu.vercel.app (requires a browser with the WebMCP origin trial enabled — Chrome 149+ / Edge 150+).

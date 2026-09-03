@@ -13,12 +13,14 @@ import { useEffect, useRef } from 'react';
 import { useCart } from '@/lib/use-cart';
 import { useWishlist } from '@/lib/use-wishlist';
 import { ACCIONES_DE_PAGINA, lineaDeCarro, type ProductoParaCarro } from '@/lib/webmcp/acciones';
+import { superficieWebMCP } from '@/lib/webmcp/superficie';
 
-type Respuesta = { content: Array<{ type: 'text'; text: string }> };
+/** Ver la nota en WebMCP.tsx: el spec serializa el valor devuelto, así que las
+ *  tools de la página devuelven valores planos y no el envoltorio de MCP. */
+type Respuesta = string;
 
 function texto(valor: unknown): Respuesta {
-  const cuerpo = typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2);
-  return { content: [{ type: 'text', text: cuerpo }] };
+  return typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2);
 }
 
 const clp = (n: number) => `$${n.toLocaleString('es-CL')}`;
@@ -72,12 +74,11 @@ export default function WebMCPAcciones() {
   });
 
   useEffect(() => {
-    const doc = document as Document & {
-      modelContext?: {
-        registerTool: (t: unknown, o?: { signal?: AbortSignal }) => Promise<unknown>;
-      };
-    };
-    if (!doc.modelContext?.registerTool) return;
+    // La misma resolución que usa `WebMCP` (document primero, navigator como
+    // alias deprecado): este componente solo se monta cuando aquel ya registró,
+    // así que acá la superficie tiene que existir — pero se mira igual.
+    const mc = superficieWebMCP();
+    if (!mc) return;
 
     const control = new AbortController();
 
@@ -103,7 +104,14 @@ export default function WebMCPAcciones() {
         // openDrawer: que la persona VEA lo que el agente puso. Un carro que
         // cambia en silencio es exactamente lo que no queremos que un agente
         // pueda hacer.
-        await vivo.current.setItem({ ...linea, openDrawer: true });
+        //
+        // Y el resultado se MIRA: setItem resuelve false cuando el servidor no
+        // guardó (500, red caída). Contar eso como "listo" es hacer que el
+        // agente le afirme a la persona algo que el carro real no tiene — el
+        // caso se vio en vivo con un /api/cart/items en 500 y la tool
+        // respondiendo "Listo, en el carro".
+        const guardado = await vivo.current.setItem({ ...linea, openDrawer: true });
+        if (!guardado) { fallaron.push(`${slug}: la tienda no pudo guardarlo en el carro (error del servidor) — no está en el carro`); continue; }
         puestos.push(`${ficha.name} ×${linea.qty} (${clp(ficha.price_clp ?? 0)} c/u)`);
       }
 
@@ -157,8 +165,7 @@ export default function WebMCPAcciones() {
     for (const accion of ACCIONES_DE_PAGINA) {
       const correr = ejecutar[accion.name];
       if (!correr) continue;
-      doc.modelContext
-        .registerTool({ ...accion, execute: correr }, { signal: control.signal })
+      mc.registerTool({ ...accion, execute: correr }, { signal: control.signal })
         .catch(() => {});
     }
 

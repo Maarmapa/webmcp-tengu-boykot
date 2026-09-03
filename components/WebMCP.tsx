@@ -22,20 +22,34 @@
 //    persona. No es una advertencia en la descripción: la herramienta
 //    literalmente no llama al checkout.
 //
-// 3. **Si el navegador no trae WebMCP, esto no existe.** Chrome 149 y Edge 150
-//    lo tienen tras un origin trial; el resto no. Sin la API, el componente no
-//    hace nada y no rompe la página.
+// 3. **Si el navegador no trae WebMCP, esto no existe.** La superficie canónica
+//    del draft (26-ago-2026) es `document.modelContext`; `navigator` quedó de
+//    alias deprecado y se acepta de fallback (ver lib/webmcp/superficie). Sin
+//    la API, el componente no hace nada y no rompe la página — salvo la única
+//    puerta explícita: `?webmcp` en la URL carga el polyfill vendored
+//    (@mcp-b/global) para demos en navegadores sin soporte nativo.
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { enlaceCarritoPrefill } from '@/lib/carrito-prefill';
+import { cargarPolyfillDemo, marcadoParaDemo, superficieWebMCP } from '@/lib/webmcp/superficie';
 import { HERRAMIENTAS_QUE_PROPONEN, herramientasDePagina } from '@/lib/webmcp/tools';
+import WebMCPAcciones from './WebMCPAcciones';
 
-/** Respuesta que WebMCP espera de un `execute`. */
-type Respuesta = { content: Array<{ type: 'text'; text: string }> };
+/** Lo que devuelve un `execute`.
+ *
+ *  El spec define `callback ToolExecuteCallback = Promise<any>` y el navegador
+ *  serializa a JSON el valor que retornes: NO existe ningún
+ *  `ModelContextToolResult`. Envolver en `{content:[{type:'text'}]}` es la
+ *  convención de MCP-B —el formato de MCP por el cable— y colarla acá le
+ *  entrega al agente el envoltorio del transporte en vez de la respuesta, o
+ *  sea una capa más que desarmar para leer un precio.
+ *
+ *  Se devuelve texto cuando la respuesta es prosa y un objeto cuando es dato
+ *  estructurado; de la serialización se encarga el navegador. */
+type Respuesta = string;
 
 function texto(valor: unknown): Respuesta {
-  const cuerpo = typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2);
-  return { content: [{ type: 'text', text: cuerpo }] };
+  return typeof valor === 'string' ? valor : JSON.stringify(valor, null, 2);
 }
 
 /**
@@ -67,8 +81,13 @@ async function llamarMcp(nombre: string, args: unknown): Promise<Respuesta> {
     if (datos?.error) {
       return texto(`El catálogo rechazó la consulta: ${datos.error.message ?? 'sin detalle'}`);
     }
-    // El servidor ya devuelve la forma { content: [...] }.
-    if (datos?.result?.content) return datos.result as Respuesta;
+    // El servidor remoto SÍ habla el formato de MCP por el cable: acá se
+    // DESENVUELVE, en vez de reenviarlo tal cual. Es la costura entre los dos
+    // extremos del puente, y es el único lugar donde ese formato existe.
+    const contenido = datos?.result?.content;
+    if (Array.isArray(contenido)) {
+      return contenido.map((c: { text?: string }) => c?.text ?? '').filter(Boolean).join('\n');
+    }
     return texto(datos?.result ?? datos);
   } catch (e) {
     const causa = e instanceof Error ? e.message : String(e);
@@ -115,7 +134,7 @@ async function proponerCarrito(args: unknown): Promise<Respuesta> {
     items: lineas.map((l) => ({ slug: l?.slug, qty: Number(l?.qty ?? 1) })),
     ref: 'webmcp',
   });
-  const detalle = cotizacion.content?.[0]?.text ?? 'sin detalle';
+  const detalle = cotizacion || 'sin detalle';
 
   return texto(
     'Carrito COTIZADO, no comprado. La compra la confirma la persona, no el agente.\n\n' +
@@ -126,24 +145,34 @@ async function proponerCarrito(args: unknown): Promise<Respuesta> {
 }
 
 export default function WebMCP() {
+  // `soportado` ya no se puede leer sincrónicamente al montar: con el flag de
+  // demo la superficie puede APARECER después de cargar el polyfill, así que
+  // es el propio efecto —que sabe si terminó registrando o no— quien decide
+  // montar las acciones de página. El servidor y el primer render dicen
+  // `false`, que es la verdad allá.
+  const [soportado, setSoportado] = useState(false);
+
   useEffect(() => {
-    const doc = document as Document & {
-      modelContext?: {
-        registerTool: (t: unknown, o?: { signal?: AbortSignal }) => Promise<unknown>;
-      };
-    };
-
-    // Sin la API no hay nada que hacer. Ni un warning: la inmensa mayoría de
-    // los navegadores todavía no la trae, y no es un error del sitio.
-    if (!doc.modelContext?.registerTool) return;
-
+    let vivo = true;
     const control = new AbortController();
 
-    for (const herramienta of herramientasDePagina()) {
-      const propone = HERRAMIENTAS_QUE_PROPONEN.has(herramienta.name);
+    void (async () => {
+      let mc = superficieWebMCP();
 
-      doc.modelContext
-        .registerTool(
+      // Sin la API, la única puerta es la demo (`?webmcp`): se carga el
+      // polyfill vendored y se vuelve a mirar. Para el visitante normal no hay
+      // nada que hacer — ni un warning: la inmensa mayoría de los navegadores
+      // todavía no la trae, y no es un error del sitio.
+      if (!mc && marcadoParaDemo()) {
+        await cargarPolyfillDemo();
+        mc = superficieWebMCP();
+      }
+      if (!mc || !vivo) return;
+
+      for (const herramienta of herramientasDePagina()) {
+        const propone = HERRAMIENTAS_QUE_PROPONEN.has(herramienta.name);
+
+        mc.registerTool(
           {
             name: herramienta.name,
             description: propone
@@ -155,14 +184,20 @@ export default function WebMCP() {
           },
           { signal: control.signal },
         )
-        // Un registro que falla —permiso denegado por Permissions-Policy, por
-        // ejemplo— no puede tumbar el render. Se ignora esa herramienta.
-        .catch(() => {});
-    }
+          // Un registro que falla —permiso denegado por Permissions-Policy, por
+          // ejemplo— no puede tumbar el render. Se ignora esa herramienta.
+          .catch(() => {});
+      }
+
+      setSoportado(true);
+    })();
 
     // Al desmontar, se abortan todos los registros de una vez.
-    return () => control.abort();
+    return () => {
+      vivo = false;
+      control.abort();
+    };
   }, []);
 
-  return null;
+  return soportado ? <WebMCPAcciones /> : null;
 }
