@@ -66,6 +66,11 @@ async function disponibilidad(fecha, personas) {
 async function crearReserva({ nombre, telefono, fecha, hora, personas, notas, origen }) {
   if (!nombre || !fecha || !hora || !personas)
     return { error: 'Faltan campos: nombre, fecha (YYYY-MM-DD), hora (HH:MM), personas.' };
+  // Lo que llega de endpoints públicos se acota acá, no solo en quien lo muestra.
+  const tel = telefono == null ? null : String(telefono).trim();
+  if (tel && !/^[+0-9\s().-]{6,25}$/.test(tel))
+    return { error: 'Teléfono inválido: solo dígitos, espacios, +, paréntesis y guiones (6 a 25 caracteres).' };
+  const notasOk = notas == null ? null : String(notas).slice(0, 300);
   const disp = await disponibilidad(fecha, personas);
   if (disp.error) return disp;
   const slot = (disp.slots || []).find((s) => s.hora === hora);
@@ -75,14 +80,14 @@ async function crearReserva({ nombre, telefono, fecha, hora, personas, notas, or
   if (SB) {
     try {
       const r = await rpc('tengu_crear_reserva', {
-        p_nombre: String(nombre).slice(0, 80), p_telefono: telefono || null,
+        p_nombre: String(nombre).slice(0, 80), p_telefono: tel || null,
         p_fecha: fecha, p_hora: hora, p_personas: parseInt(personas, 10),
-        p_notas: notas || null, p_origen: origen || 'web',
+        p_notas: notasOk || null, p_origen: origen || 'web',
       });
       if (r.error) return r;
       return {
         codigo: r.codigo, estado: 'solicitada (entorno de prueba)',
-        nombre, telefono: telefono || null, fecha, hora, personas: parseInt(personas, 10), notas: notas || null,
+        nombre, telefono: tel || null, fecha, hora, personas: parseInt(personas, 10), notas: notasOk || null,
         aviso: 'Solicitud registrada en el sistema de PRUEBA de Tengu — todavía no la atiende nadie del restaurante. Para reservar de verdad: https://tengu-deploy.vercel.app/#reserve',
       };
     } catch (e) { /* cae al modo determinístico */ }
@@ -90,7 +95,7 @@ async function crearReserva({ nombre, telefono, fecha, hora, personas, notas, or
   const codigo = 'SANDBOX-' + hash([nombre, fecha, hora, personas].join('|')).toString(36).toUpperCase();
   return {
     codigo, estado: 'confirmada (SANDBOX — no es una reserva real)',
-    nombre, telefono: telefono || null, fecha, hora, personas: parseInt(personas, 10), notas: notas || null,
+    nombre, telefono: tel || null, fecha, hora, personas: parseInt(personas, 10), notas: notasOk || null,
     aviso: 'Entorno de demostración: esta reserva NO existe en el restaurante. Para reservar de verdad: https://tengu-deploy.vercel.app/#reserve',
   };
 }

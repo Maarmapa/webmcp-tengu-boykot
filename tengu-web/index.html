@@ -1410,7 +1410,7 @@ function askSugg(key){if(isStreaming)return;const map={'sake teppanyaki':'¿Qué
     return fetch('/api/mcp',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({jsonrpc:'2.0',id:Date.now(),method:'tools/call',params:{name:name,arguments:args||{}}})})
       .then(function(r){return r.json()})
-      .then(function(j){return (j.result&&j.result.content&&j.result.content[0]&&j.result.content[0].text)||'Sin datos.'});
+      .then(function(j){ if(j&&j.error) return 'Error del servidor: '+(j.error.message||'desconocido')+'.'; return (j.result&&j.result.content&&j.result.content[0]&&j.result.content[0].text)||'Sin datos.'; }).catch(function(e){ return 'No pude consultar ahora ('+((e&&e.message)||e)+'). Reintentá en unos segundos.'; });
   }
   var TOOLS = [
     {name:'get_carta', description:'Carta oficial de Tengu con precios reales en CLP. Sin argumentos: índice de secciones. Con seccion (Comida, Barra, Vinos, Vinos por copa, Sake) o categoria: el detalle.',
@@ -1430,11 +1430,19 @@ function askSugg(key){if(isStreaming)return;const map={'sake teppanyaki':'¿Qué
      execute:function(a){
        try{
          // Marca cada campo que tocó el agente y junta la lista para el aviso.
-         var tocados=[];
-         var set=function(id,v,etq){
-           var e=document.getElementById(id);
-           if(e&&v!=null&&String(v)!==''){ e.value=v; e.classList.add('sr-agente'); if(etq) tocados.push(etq); }
-         };
+         // El formulario vive en el tab de WhatsApp; el tab por defecto es el iframe
+          // de reserva online. Sin este cambio la tool llenaba un formulario oculto.
+          if(typeof switchReserva==='function') switchReserva('whatsapp');
+          var tocados=[], noAplicados=[];
+          var set=function(id,v,etq){
+            var e=document.getElementById(id);
+            if(!e||v==null||String(v)==='') return;
+            e.value=v;
+            // Un <select> con un value que no existe queda vacío en silencio:
+            // se lee de vuelta para no decir "completado" cuando no lo está.
+            if(String(e.value)===String(v)){ e.classList.add('sr-agente'); if(etq) tocados.push(etq); }
+            else { noAplicados.push((etq||id)+'='+v); }
+          };
          // srGuests es un <select> con tramos ("4 personas", "5-6 personas"):
          // el agente manda un número y hay que mapearlo al tramo, o el value
          // no calza con ninguna opción y el campo queda vacío en silencio.
@@ -1453,8 +1461,11 @@ function askSugg(key){if(isStreaming)return;const map={'sake teppanyaki':'¿Qué
          set('srOcc',a.ocasion,'ocasión'); set('srNotes',a.notas,'notas');
          var av=document.getElementById('srAviso');
          if(av){
-           av.innerHTML='Un agente completó este formulario: <b>'+tocados.join(', ')+'</b>. '+
-                        'Nada se envió todavía — revisalo y confirmá vos.'+
+           var horas=[].map.call((document.getElementById('srTime')||{options:[]}).options,function(o){return o.value}).filter(Boolean);
+            var esc=function(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+            av.innerHTML='Un agente completó este formulario: <b>'+esc(tocados.join(', ')||'ningún campo')+'</b>. '+
+                         (noAplicados.length?('No reconocí: <b>'+esc(noAplicados.join(', '))+'</b> (horas válidas: '+esc(horas.join(', '))+'). '):'')+
+                         'Nada se envió todavía — revisalo y confirmá vos.'+
                         '<br><button type="button" id="srLimpiar">Descartar y llenarlo yo</button>';
            av.classList.add('on');
            var b=document.getElementById('srLimpiar');
@@ -1466,7 +1477,11 @@ function askSugg(key){if(isStreaming)return;const map={'sake teppanyaki':'¿Qué
            };
          }
          var r=document.getElementById('reserve'); if(r) r.scrollIntoView({behavior:'smooth'});
-         return Promise.resolve('Formulario de reserva completado y visible en pantalla. Pedile a la persona que lo revise y presione "Reservar por WhatsApp" para confirmar — el envío es humano, no del agente.');
+         var horasR=[].map.call((document.getElementById('srTime')||{options:[]}).options,function(o){return o.value}).filter(Boolean);
+          var msg='Formulario de reserva a la vista. Campos completados: '+(tocados.length?tocados.join(', '):'ninguno')+'.';
+          if(noAplicados.length) msg+=' NO pude aplicar: '+noAplicados.join(', ')+' (la hora debe ser una de: '+horasR.join(', ')+').';
+          msg+=' NO se envió nada: la persona revisa y presiona "Reservar por WhatsApp" — el envío es humano, no del agente.';
+          return Promise.resolve(msg);
        }catch(e){ return Promise.resolve('No pude completar el formulario: '+e.message); }
      }}
   ];

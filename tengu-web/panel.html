@@ -44,6 +44,8 @@ button{cursor:pointer}button:hover{border-color:var(--gold)}
 <div id="lista"><p id="vacio">Ingresa la clave para cargar el día.</p></div>
 <p class="aviso">Sistema en marcha blanca — las solicitudes de agentes y pruebas aparecen aquí. Confirmar una reserva NO avisa aún al comensal (fase notificaciones).</p>
 <script>
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
 const $=id=>document.getElementById(id);
 function clave(){
   let c=sessionStorage.getItem('tsala');
@@ -64,8 +66,8 @@ async function cargar(){
       <div style="display:flex;gap:14px;align-items:center">
         <span class="hora">${x.hora}</span>
         <div>
-          <div class="nombre">${(x.nombre||'').replace(/</g,'&lt;')} · ${x.personas}p</div>
-          <div class="meta">${x.codigo} · ${x.origen}${x.telefono?(' · '+x.telefono):''}${x.notas?(' · '+String(x.notas).replace(/</g,'&lt;')):''}</div>
+          <div class="nombre">${esc(x.nombre)} · ${esc(x.personas)}p</div>
+          <div class="meta">${esc(x.codigo)} · ${esc(x.origen)}${x.telefono?(' · '+esc(x.telefono)):''}${x.notas?(' · '+esc(x.notas)):''}</div>
         </div>
       </div>
       <div style="display:flex;gap:10px;align-items:center">
@@ -102,10 +104,10 @@ async function cargarEventos(){
   const nuevo='<div style="margin-bottom:12px"><button onclick="nuevoEvento()">+ Nueva experiencia</button></div>';
   if(!evs.length){ $('lista').innerHTML=nuevo+'<p id="vacio">Sin experiencias creadas.</p>'; return; }
   $('lista').innerHTML=nuevo+evs.map(ev=>{
-    const zonas=(ev.zonas||[]).map(z=>`${z.nombre}: ${z.vendidos}/${z.cupos} · ${clp(z.precio)}`).join(' &nbsp;|&nbsp; ');
+    const zonas=(ev.zonas||[]).map(z=>`${esc(z.nombre)}: ${esc(z.vendidos)}/${esc(z.cupos)} · ${clp(z.precio)}`).join(' &nbsp;|&nbsp; ');
     const editor=`<div id="ed-${ev.slug}" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(200,146,26,.15)">
       <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin-bottom:8px">
-        <input id="n-${ev.slug}" value="${(ev.nombre||'').replace(/"/g,'&quot;')}" placeholder="Nombre">
+        <input id="n-${ev.slug}" value="${esc(ev.nombre)}" placeholder="Nombre">
         <input id="f-${ev.slug}" type="date" value="${ev.fecha}">
         <input id="h-${ev.slug}" value="${ev.hora}" placeholder="20:00">
       </div>
@@ -115,7 +117,7 @@ async function cargarEventos(){
       <div style="margin-top:14px">
         ${(ev.zonas||[]).map(z=>`
           <div style="display:grid;grid-template-columns:1.1fr 2fr 1fr .8fr auto;gap:8px;margin-bottom:8px;align-items:center">
-            <input id="zn-${z.id}" value="${(z.nombre||'').replace(/"/g,'&quot;')}" placeholder="Zona">
+            <input id="zn-${z.id}" value="${esc(z.nombre)}" placeholder="Zona">
             <input id="zd-${z.id}" value="${(z.descripcion||'').replace(/"/g,'&quot;')}" placeholder="Descripcion">
             <input id="zp-${z.id}" type="number" value="${z.precio}" placeholder="Precio">
             <input id="zc-${z.id}" type="number" value="${z.cupos}" placeholder="Cupos">
@@ -125,7 +127,7 @@ async function cargarEventos(){
     </div>`;
     const tickets=(ev.tickets||[]).map(t=>`
       <div class="card" style="margin:6px 0 0;padding:10px 14px">
-        <div><div class="nombre" style="font-size:16px">${(t.nombre||'').replace(/</g,'&lt;')} · ${t.cantidad}p · ${clp(t.monto)}</div>
+        <div><div class="nombre" style="font-size:16px">${esc(t.nombre)} · ${esc(t.cantidad)}p · ${clp(t.monto)}</div>
         <div class="meta">${t.codigo} · ${t.zona||''}${t.telefono?(' · '+t.telefono):''}${t.email?(' · '+t.email):''}</div></div>
         <div style="display:flex;gap:8px;align-items:center">
           <span class="estado ${t.estado==='pagado'?'confirmada':(t.estado==='anulado'?'cancelada':'')}">${t.estado}</span>
