@@ -1,7 +1,7 @@
 # Tengu & Boykot — two real Chilean businesses your agent can actually use
 
 **Live URLs:** https://tengu-deploy.vercel.app (restaurant) · https://boykot-nu.vercel.app (art-supply store)
-**Repos:** https://github.com/Maarmapa/tengu-web (MIT, complete static site) · https://github.com/Maarmapa/boykot-webmcp (MIT, the store's WebMCP layer)
+**Repo:** https://github.com/Maarmapa/webmcp-tengu-boykot (MIT) — both sites with full commit history via `git subtree`; upstreams: https://github.com/Maarmapa/tengu-web · https://github.com/Maarmapa/boykot-webmcp
 
 ---
 
