@@ -71,7 +71,7 @@ if (!mc || typeof mc.registerTool !== 'function') return;
 | `buscar_plato` | search dishes, drinks, wines and sake |
 | `get_guia` | long-form guides written by the restaurant (sake, bluefin, kappo) |
 | `get_info` | address, hours, how to book |
-| `preparar_reserva` | fills the booking form on the page and leaves it for the human — never sends |
+| `preparar_reserva` | switches to the booking form, fills it, marks each field it touched and reports what it could not apply — never sends |
 
 The read tools are thin proxies to the same `/api/mcp` JSON-RPC server the restaurant runs
 for out-of-page agents, so a browser agent and a server agent get byte-identical answers.
@@ -91,8 +91,9 @@ stealing:
 2. **Buying proposes, never executes.** The page version of `create_checkout` prepares the
    cart and returns the link; the money click is the person's.
 
-Boykot runs the API **natively** through the WebMCP origin trial (Chrome 149+ and Edge 150+
-tokens in the page head). Tengu uses the `@mcp-b/global` polyfill behind a `?webmcp` flag.
+Both sites run the API **natively** through the WebMCP origin trial (Chrome 149+ and Edge 150+
+tokens in each page head). Tengu additionally ships the `@mcp-b/global` polyfill behind a
+`?webmcp` flag for browsers without the trial.
 
 **Deliberately not exposed:** anything that spends money or commits either business. No
 payment, no confirmation, no cancellation, no back-office tools.
@@ -113,9 +114,9 @@ period (Aug 25 – Sep 3, 2026)**:
 
 ## How to try it
 
-- **Chrome 149+ / Edge 150+**: open https://boykot-nu.vercel.app — the tools register
-  natively via origin trial. For Tengu, enable `chrome://flags/#enable-webmcp-testing` or
-  open https://tengu-deploy.vercel.app/?webmcp (polyfill).
+- **Chrome 149+ / Edge 150+**: open https://tengu-deploy.vercel.app and
+  https://boykot-nu.vercel.app — the tools register natively via origin trial. In other
+  browsers, https://tengu-deploy.vercel.app/?webmcp loads the polyfill.
 - Ask the agent: *"What sake do they have, and what's the most expensive thing on the menu?"*
   then *"Book me a table for four next Friday at 8pm, name Mario."* — watch the form fill and
   **not** send.
