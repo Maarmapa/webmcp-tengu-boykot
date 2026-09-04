@@ -1,6 +1,6 @@
-# Tengu — W Santiago
+# Tengu — Isidora 3000
 
-Sitio one-page del restaurante Tengu (Isidora Goyenechea 3000, local 104, edificio W Santiago).
+Sitio one-page del restaurante Tengu (Isidora Goyenechea 3000, local 104, Las Condes).
 
 - **Live**: https://tengu-deploy.vercel.app
 - Estático puro: `index.html` + fotos. Sin build, sin dependencias.

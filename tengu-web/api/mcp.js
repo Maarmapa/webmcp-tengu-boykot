@@ -7,7 +7,7 @@ const GUIAS = require('./_guias.js');
 const INFO = {
   nombre: 'Tengu',
   tipo: 'Restaurante japonés kappo',
-  direccion: 'Isidora Goyenechea 3000, Local 104, Las Condes, Santiago de Chile (edificio del hotel W Santiago)',
+  direccion: 'Isidora Goyenechea 3000, Local 104, Las Condes, Santiago de Chile ',
   horarios: 'Martes a sábado: almuerzo 13:00 a 15:00 y cena 19:00 a 22:00 (últimas horas de entrada). Domingo: solo almuerzo, 13:00 a 15:00. Lunes cerrado.',
   web: 'https://tengu-deploy.vercel.app',
   instagram: 'https://www.instagram.com/tengu_restaurant/',
@@ -127,7 +127,7 @@ module.exports = async (req, res) => {
           capabilities: { tools: {} },
           serverInfo: { name: 'tengu-mcp', version: '1.0.0' },
           instructions:
-            'MCP oficial del restaurante Tengu (W Santiago, Chile). Solo lectura: carta real con precios en CLP, información y horarios. Para reservar, dirigir al usuario a la web o WhatsApp del restaurante.',
+            'MCP oficial del restaurante Tengu (Isidora 3000, Chile). Solo lectura: carta real con precios en CLP, información y horarios. Para reservar, dirigir al usuario a la web o WhatsApp del restaurante.',
         });
       case 'ping':
         return reply(msg.id, {});

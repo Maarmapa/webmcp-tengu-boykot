@@ -1,4 +1,4 @@
-# Tengu — W Santiago. Bienvenidos humanos y agentes.
+# Tengu — Isidora 3000. Bienvenidos humanos y agentes.
 User-agent: *
 Allow: /
 
