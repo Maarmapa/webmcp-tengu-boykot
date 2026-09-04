@@ -54,7 +54,48 @@ const TOOLS = [
 ];
 
 const strip = (s) =>
-  (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+// Tolerancia de plural: "postres" y "postre" son la misma cosa.
+const sing = (w) =>
+  w.length > 4 && /(es|s)$/.test(w) ? w.replace(/(es|s)$/, '') : w;
+
+// La carta vive en español. El agente ya traduce para la persona; lo que no
+// puede es no encontrar. Este diccionario se aplica a la CONSULTA, nunca a los
+// datos, para que la carta siga teniendo una sola fuente de verdad.
+const SINONIMOS = {
+  tuna: 'atun', bluefin: 'atun', salmon: 'salmon', shrimp: 'camaron',
+  prawn: 'camaron', eel: 'anguila', octopus: 'pulpo', squid: 'calamar',
+  scallop: 'ostion', crab: 'jaiba', roe: 'huevas', beef: 'wagyu',
+  chicken: 'pollo', pork: 'cerdo', rice: 'arroz', noodle: 'ramen',
+  soup: 'sopa', dessert: 'postre', sweet: 'postre', starter: 'comenzar',
+  appetizer: 'comenzar', wine: 'vino', red: 'tinto', white: 'blanco',
+  sparkling: 'espumante', beer: 'cerveza', cocktail: 'cocteleria',
+  drink: 'bebida', water: 'agua', coffee: 'cafe', tea: 'te',
+  raw: 'crudo', grilled: 'parrilla', fried: 'frito', spicy: 'picante',
+  vegetarian: 'vegetariano', vegan: 'vegano', 'gluten-free': 'sin gluten',
+  food: 'comida', menu: 'carta', bar: 'barra', glass: 'copa',
+  bottle: 'botella', sake: 'sake', roll: 'maki', hot: 'caliente'
+};
+
+// Palabras del texto, normalizadas y sin plural, para comparar por palabra
+// completa en vez de por subcadena: así "tuna" deja de matchear "aceitunas".
+const palabras = (s) => strip(s).split(/[^a-z0-9]+/).filter(Boolean).map(sing);
+
+const traducir = (q) =>
+  strip(q).split(/\s+/).filter(Boolean)
+    .map((w) => SINONIMOS[w] || SINONIMOS[sing(w)] || w)
+    .join(' ');
+
+// Un ítem coincide si CADA término de la consulta aparece como palabra completa
+// (o como prefijo de al menos 4 letras) en su nombre, descripción o categoría.
+function coincide(item, consulta) {
+  const campos = palabras(`${item.n} ${item.d || ''} ${item.c} ${item.s}`);
+  return consulta.split(/\s+/).filter(Boolean).every((t) => {
+    const term = sing(t);
+    return campos.some((w) => w === term || (term.length >= 4 && w.startsWith(term)));
+  });
+}
 
 function fmtItem(i) {
   return `${i.n} — ${i.p}${i.chef ? ' ★' : ''}${i.d ? ` · ${i.d}` : ''} [${i.s} / ${i.c}]`;
@@ -75,8 +116,18 @@ function runTool(name, args) {
 
   if (name === 'get_carta') {
     let items = CARTA;
-    if (args.seccion) items = items.filter((i) => strip(i.s) === strip(args.seccion));
-    if (args.categoria) items = items.filter((i) => strip(i.c).includes(strip(args.categoria)));
+    if (args.seccion) {
+      const q = palabras(traducir(args.seccion)).join(' ');
+      items = items.filter((i) => palabras(i.s).join(' ') === q);
+    }
+    if (args.categoria) {
+      const c = traducir(args.categoria);
+      items = items.filter((i) => {
+        const cat = palabras(i.c).join(' ');
+        const q = palabras(c).join(' ');
+        return cat === q || cat.includes(q) || q.includes(cat);
+      });
+    }
     if (!args.seccion && !args.categoria) {
       const idx = {};
       for (const i of CARTA) {
@@ -95,9 +146,9 @@ function runTool(name, args) {
   }
 
   if (name === 'buscar_plato') {
-    const q = strip(args.query);
+    const q = traducir(args.query);
     if (!q) return 'Falta query.';
-    const hits = CARTA.filter((i) => strip(i.n).includes(q) || strip(i.d || '').includes(q) || strip(i.c).includes(q));
+    const hits = CARTA.filter((i) => coincide(i, q));
     return hits.length ? hits.slice(0, 40).map(fmtItem).join('\n') : `Nada en la carta para "${args.query}".`;
   }
 
