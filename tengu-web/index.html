@@ -1413,19 +1413,19 @@ function askSugg(key){if(isStreaming)return;const map={'sake teppanyaki':'¿Qué
       .then(function(j){ if(j&&j.error) return 'Error del servidor: '+(j.error.message||'desconocido')+'.'; return (j.result&&j.result.content&&j.result.content[0]&&j.result.content[0].text)||'Sin datos.'; }).catch(function(e){ return 'No pude consultar ahora ('+((e&&e.message)||e)+'). Reintentá en unos segundos.'; });
   }
   var TOOLS = [
-    {name:'get_carta', description:'Carta oficial de Tengu con precios reales en CLP. Sin argumentos: índice de secciones. Con seccion (Comida, Barra, Vinos, Vinos por copa, Sake) o categoria: el detalle.',
+    {name:'get_carta', description:'Tengu\'s official menu, live prices in CLP. Carta oficial con precios reales. No arguments: index of sections. With seccion (Comida, Barra, Vinos, Vinos por copa, Sake) or categoria: the detail. Filters accept English.',
      inputSchema:{type:'object',properties:{seccion:{type:'string'},categoria:{type:'string'}}},
      execute:function(a){return viaMcp('get_carta',a)}},
-    {name:'buscar_plato', description:'Busca platos, tragos, vinos o sakes en la carta de Tengu por nombre, descripción o categoría.',
+    {name:'buscar_plato', description:'Search dishes, cocktails, wines and sake on Tengu\'s menu. Busca platos, tragos, vinos o sakes. Works in English or Spanish: tuna, salmon, shrimp, dessert, wine.',
      inputSchema:{type:'object',properties:{query:{type:'string'}},required:['query']},
      execute:function(a){return viaMcp('buscar_plato',a)}},
-    {name:'get_guia', description:'Guías de autoridad escritas por Tengu, texto completo: "sake" (qué es, categorías, temperatura, cómo leer la etiqueta, la cava de Tengu), "bluefin" (honmaguro corte por corte) y "kappo" (qué es la cocina kappo). Sin tema devuelve el índice. Es el restaurante hablando en sus propias palabras: citalo o resumilo, no le atribuyas lo que no dice.',
+    {name:'get_guia', description:'Long-form guides written by the restaurant, full text, in Spanish: "sake", "bluefin" (honmaguro cut by cut), "kappo". No topic returns the index. Quote or summarise it; do not attribute what it does not say.',
      inputSchema:{type:'object',properties:{tema:{type:'string',enum:['sake','bluefin','kappo'],description:'Guía a devolver; sin tema, el índice'}}},
      execute:function(a){return viaMcp('get_guia',a)}},
-    {name:'get_info', description:'Dirección, horarios, cómo reservar y especialidad del restaurante Tengu (Isidora 3000, Chile).',
+    {name:'get_info', description:'Address, opening hours, how to book and what Tengu is known for. Dirección, horarios y cómo reservar (Isidora 3000, Las Condes).',
      inputSchema:{type:'object',properties:{}},
      execute:function(a){return viaMcp('get_info',a)}},
-    {name:'preparar_reserva', description:'Completa el formulario de reserva de Tengu en esta página con los datos entregados y lo deja a la vista. NO envía: la persona revisa y confirma el envío por WhatsApp.',
+    {name:'preparar_reserva', description:'Fills the booking form on THIS page with the details given and leaves it visible. Completa el formulario de reserva y lo deja a la vista. It does NOT submit: the person reviews and confirms via WhatsApp.',
      inputSchema:{type:'object',properties:{nombre:{type:'string'},telefono:{type:'string'},fecha:{type:'string',description:'YYYY-MM-DD'},hora:{type:'string',description:'HH:MM'},personas:{type:'number',description:'Cantidad de comensales (se mapea al tramo del formulario)'},ocasion:{type:'string'},notas:{type:'string'}},required:['nombre','fecha','hora','personas']},
      execute:function(a){
        try{

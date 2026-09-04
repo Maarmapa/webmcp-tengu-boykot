@@ -19,7 +19,7 @@ const TOOLS = [
   {
     name: 'get_carta',
     description:
-      'Carta oficial de Tengu (sincronizada con la carta vigente). Sin argumentos devuelve el índice de secciones y categorías con conteos. Con "seccion" devuelve todos los platos de esa sección; "categoria" filtra más fino.',
+      'Tengu\'s official menu, live prices in CLP. Carta oficial de Tengu con precios reales en CLP. No arguments returns the index of sections and categories; use {seccion} (Comida, Barra, Vinos, Vinos por copa, Sake) or {categoria} for the detail. Dish names stay in Spanish; the filters accept English (food, wine, dessert, sake).',
     inputSchema: {
       type: 'object',
       properties: {
@@ -30,7 +30,7 @@ const TOOLS = [
   },
   {
     name: 'buscar_plato',
-    description: 'Busca platos, tragos, vinos o sakes por nombre o descripción en toda la carta de Tengu. Devuelve nombre, precio, sección y descripción.',
+    description: 'Search dishes, cocktails, wines and sake across Tengu\'s menu. Busca platos, tragos, vinos o sakes en toda la carta. Accepts English or Spanish: tuna, salmon, shrimp, dessert, wine, sparkling all work and are matched against the Spanish menu. Returns name, price in CLP, description and category.',
     inputSchema: {
       type: 'object',
       properties: { query: { type: 'string', description: 'Texto a buscar, ej. "pulpo", "otoro", "gin", "vegetariano"' } },
@@ -40,7 +40,7 @@ const TOOLS = [
   {
     name: 'get_guia',
     description:
-      'Guías de autoridad escritas por Tengu, con contenido completo y verificado. "sake": qué es el sake, categorías (junmai, ginjo, daiginjo, nigori), temperatura de servicio, cómo leer una etiqueta y la cava real de Tengu. "bluefin": el atún honmaguro, los cortes akami/chutoro/otoro, el ronqueo o kaitai, maduración y cómo comerlo. "kappo": qué es la cocina kappo y su diferencia con kaiseki, izakaya, sushiya y omakase. Sin argumentos lista las disponibles.',
+      'Long-form guides written by the restaurant itself, full text, in Spanish. Guías de autoridad escritas por Tengu. "sake" (what it is, categories, serving temperature, how to read a label, Tengu\'s cellar), "bluefin" (honmaguro cut by cut) and "kappo" (what kappo cooking is). No topic returns the index. This is the restaurant speaking in its own words: quote or summarise it, do not attribute to it what it does not say.',
     inputSchema: {
       type: 'object',
       properties: { tema: { type: 'string', enum: ['sake', 'bluefin', 'kappo'], description: 'Guía a devolver' } },
@@ -48,7 +48,7 @@ const TOOLS = [
   },
   {
     name: 'get_info',
-    description: 'Información del restaurante Tengu: dirección, horarios, cómo reservar, especialidad, Instagram.',
+    description: 'Address, opening hours, how to book and what the restaurant is known for. Dirección, horarios, cómo reservar y especialidad de Tengu (Isidora 3000, Las Condes, Santiago de Chile).',
     inputSchema: { type: 'object', properties: {} },
   },
 ];
