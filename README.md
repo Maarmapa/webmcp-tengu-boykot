@@ -10,7 +10,7 @@ human to send or pay.
 |---|---|---|
 | Live | https://tengu-deploy.vercel.app | https://boykot-nu.vercel.app |
 | Tools in the page | 5 (`get_carta`, `buscar_plato`, `get_guia`, `get_info`, `preparar_reserva`) | 13 (10 catalog + `agregar_al_carro`, `ver_mi_carro`, `guardar_en_lista`) |
-| Surface | `document.modelContext` (polyfill behind `?webmcp`) | `document.modelContext`, **native via origin trial** (Chrome 149+ / Edge 150+) |
+| Surface | `document.modelContext`, **native via origin trial** (Chrome 149+ / Edge 150+); `@mcp-b/global` polyfill behind `?webmcp` as a fallback | `document.modelContext`, **native via origin trial** (Chrome 149+ / Edge 150+) |
 | Code | [`tengu-web/`](./tengu-web) — complete static site | [`boykot-webmcp/`](./boykot-webmcp) — the store's WebMCP layer (store codebase is private) |
 | Upstream repo (full history) | https://github.com/Maarmapa/tengu-web | https://github.com/Maarmapa/boykot-webmcp |
 
@@ -19,8 +19,8 @@ preserved**, so the work done inside the submission period is verifiable here:
 `git log --since=2026-08-25 -- tengu-web` and `git log --since=2026-08-25 -- boykot-webmcp`.
 
 - **Submission text:** [`SUBMISSION.md`](./SUBMISSION.md)
-- **How to try it:** open the live URLs in Chrome 149+/Edge 150+ (Boykot registers natively);
-  for Tengu enable `chrome://flags/#enable-webmcp-testing` or open
-  https://tengu-deploy.vercel.app/?webmcp. Then ask the agent for the sake list and to
-  *"book a table for four next Friday at 8pm"* — watch the form fill and **not** send.
+- **How to try it:** open either live URL in Chrome 149+ or Edge 150+ — **both register
+  natively**, no flag and no query string needed. (On an older browser, Tengu also loads a
+  polyfill at https://tengu-deploy.vercel.app/?webmcp.) Then ask the agent for the sake list
+  and to *"book a table for four next Friday at 8pm"* — watch the form fill and **not** send.
 - **License:** MIT (this repo and both upstreams).
