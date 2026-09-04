@@ -1464,7 +1464,7 @@ function askSugg(key){if(isStreaming)return;const map={'sake teppanyaki':'¿Qué
            var horas=[].map.call((document.getElementById('srTime')||{options:[]}).options,function(o){return o.value}).filter(Boolean);
             var esc=function(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
             av.innerHTML='Un agente completó este formulario: <b>'+esc(tocados.join(', ')||'ningún campo')+'</b>. '+
-                         (noAplicados.length?('No reconocí: <b>'+esc(noAplicados.join(', '))+'</b> (horas válidas: '+esc(horas.join(', '))+'). '):'')+
+                         (noAplicados.length?('No reconocí: <b>'+esc(noAplicados.join(', '))+'</b>'+(noAplicados.some(function(s){return s.indexOf('hora=')===0;})?(' (horas válidas: '+esc(horas.join(', '))+')'):'')+'. '):'')+
                          'Nada se envió todavía — revisalo y confirmá vos.'+
                         '<br><button type="button" id="srLimpiar">Descartar y llenarlo yo</button>';
            av.classList.add('on');
@@ -1479,8 +1479,11 @@ function askSugg(key){if(isStreaming)return;const map={'sake teppanyaki':'¿Qué
          var r=document.getElementById('reserve'); if(r) r.scrollIntoView({behavior:'smooth'});
          var horasR=[].map.call((document.getElementById('srTime')||{options:[]}).options,function(o){return o.value}).filter(Boolean);
           var msg='Formulario de reserva a la vista. Campos completados: '+(tocados.length?tocados.join(', '):'ninguno')+'.';
-          if(noAplicados.length) msg+=' NO pude aplicar: '+noAplicados.join(', ')+' (la hora debe ser una de: '+horasR.join(', ')+').';
-          msg+=' NO se envió nada: la persona revisa y presiona "Reservar por WhatsApp" — el envío es humano, no del agente.';
+          if(noAplicados.length){
+            msg+=' NO pude aplicar: '+noAplicados.join(', ')+'.';
+            if(noAplicados.some(function(s){return s.indexOf('hora=')===0;})) msg+=' La hora debe ser una de: '+horasR.join(', ')+'.';
+          }
+          msg+=' NO se envió nada: la persona revisa y presiona "Enviar solicitud de reserva", que abre WhatsApp — el envío es humano, no del agente.';
           return Promise.resolve(msg);
        }catch(e){ return Promise.resolve('No pude completar el formulario: '+e.message); }
      }}
