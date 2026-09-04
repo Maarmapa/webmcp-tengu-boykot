@@ -40,10 +40,13 @@ const TOOLS = [
   {
     name: 'get_guia',
     description:
-      'Long-form guides written by the restaurant itself, full text, in Spanish. Guías de autoridad escritas por Tengu. "sake" (what it is, categories, serving temperature, how to read a label, Tengu\'s cellar), "bluefin" (honmaguro cut by cut) and "kappo" (what kappo cooking is). No topic returns the index. This is the restaurant speaking in its own words: quote or summarise it, do not attribute to it what it does not say.',
+      'Long-form guides written by the restaurant itself, full text, in Spanish. Guías de autoridad escritas por Tengu. "sake" (what it is, categories, serving temperature, how to read a label, Tengu\'s cellar), "bluefin" (honmaguro cut by cut) and "kappo" (what kappo cooking is). No topic returns the index. Pass {idioma:"en"} for the restaurant\'s own English summary and outline of a guide; the full text is Spanish. This is the restaurant speaking in its own words: quote or summarise it, do not attribute to it what it does not say.',
     inputSchema: {
       type: 'object',
-      properties: { tema: { type: 'string', enum: ['sake', 'bluefin', 'kappo'], description: 'Guía a devolver' } },
+      properties: {
+        tema: { type: 'string', enum: ['sake', 'bluefin', 'kappo'], description: 'Guía a devolver / guide to return' },
+        idioma: { type: 'string', enum: ['es', 'en'], description: 'es (default) returns the full Spanish text; en returns the restaurant\'s own English summary and outline' },
+      },
     },
   },
   {
@@ -107,11 +110,31 @@ function runTool(name, args) {
 
   if (name === 'get_guia') {
     const t = strip(args.tema || '');
+    const en = strip(args.idioma || '') === 'en';
     if (!t || !GUIAS[t]) {
-      return 'Guías disponibles (usar get_guia con {tema}):\n' +
-        Object.entries(GUIAS).map(([k, g]) => `- ${k}: ${g.titulo} → ${g.url}`).join('\n');
+      return (en
+        ? 'Guides written by the restaurant (use get_guia with {tema}):\n' +
+          Object.entries(GUIAS).map(([k, g]) => `- ${k}: ${(g.en && g.en.titulo) || g.titulo} → ${g.url}`).join('\n')
+        : 'Guías disponibles (usar get_guia con {tema}):\n' +
+          Object.entries(GUIAS).map(([k, g]) => `- ${k}: ${g.titulo} → ${g.url}`).join('\n'));
     }
-    return GUIAS[t].texto;
+    const g = GUIAS[t];
+    // El texto completo vive en español porque es la voz del restaurante. En
+    // inglés devolvemos su propio resumen y el índice, escritos —no traducidos
+    // a máquina— para que un agente responda sin inventar y sepa qué hay dentro.
+    if (en && g.en) {
+      return [
+        `# ${g.en.titulo}`,
+        '',
+        g.en.resumen,
+        '',
+        'What is inside:',
+        ...g.en.indice.map((x) => `- ${x}`),
+        '',
+        `The full guide is written in Spanish and lives at ${g.url}. Call get_guia with {tema:"${t}"} to read it in full; quote or summarise it, and do not attribute to the restaurant what it does not say.`,
+      ].join('\n');
+    }
+    return g.texto;
   }
 
   if (name === 'get_carta') {
